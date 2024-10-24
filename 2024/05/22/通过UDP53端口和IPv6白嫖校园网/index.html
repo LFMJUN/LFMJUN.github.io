@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="zDL-jg444V1v-qBtwIOOIgmdhene_3VfxGfjWooDqhM">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.fala666.cn","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="原理UDP 53 是 DNS 协议所用端口，由于门户（Portal）认证为了实现 HTTP 劫持跳转到登录页面，必须使得浏览器能够正常地进行 DNS 解析，因此在不认证、不付费的情况下也会放行 UDP 53 端口的流量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="通过UDP53端口和IPv6白嫖校园网">
+<meta property="og:url" content="https://blog.fala666.cn/2024/05/22/%E9%80%9A%E8%BF%87UDP53%E7%AB%AF%E5%8F%A3%E5%92%8CIPv6%E7%99%BD%E5%AB%96%E6%A0%A1%E5%9B%AD%E7%BD%91/index.html">
+<meta property="og:site_name" content="法拉的小破站">
+<meta property="og:description" content="原理UDP 53 是 DNS 协议所用端口，由于门户（Portal）认证为了实现 HTTP 劫持跳转到登录页面，必须使得浏览器能够正常地进行 DNS 解析，因此在不认证、不付费的情况下也会放行 UDP 53 端口的流量">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522132426.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522132709.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522132854.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522133725.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522133923.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/d98dc936c39dbd73c796aa341ffdde8.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/7114c90aa8ef095f9e9ec8c32f8c1e1.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/9abdf27b5629378d5fae11f4f3672aa.png">
+<meta property="og:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/6be791bb9a7960f3285cc31ecfc8d54.png">
+<meta property="article:published_time" content="2024-05-22T05:01:27.000Z">
+<meta property="article:modified_time" content="2024-05-21T16:00:00.000Z">
+<meta property="article:author" content="Farah">
+<meta property="article:tag" content="校园网">
+<meta property="article:tag" content="白嫖">
+<meta property="article:tag" content="绕过">
+<meta property="article:tag" content="UDP">
+<meta property="article:tag" content="DNS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522132426.png">
+
+<link rel="canonical" href="https://blog.fala666.cn/2024/05/22/%E9%80%9A%E8%BF%87UDP53%E7%AB%AF%E5%8F%A3%E5%92%8CIPv6%E7%99%BD%E5%AB%96%E6%A0%A1%E5%9B%AD%E7%BD%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>通过UDP53端口和IPv6白嫖校园网 | 法拉的小破站</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com/LFMJUN" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">法拉的小破站</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">世界既不白也不黑，而是一道精致的灰</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.fala666.cn/2024/05/22/%E9%80%9A%E8%BF%87UDP53%E7%AB%AF%E5%8F%A3%E5%92%8CIPv6%E7%99%BD%E5%AB%96%E6%A0%A1%E5%9B%AD%E7%BD%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpg">
+      <meta itemprop="name" content="Farah">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="法拉的小破站">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          通过UDP53端口和IPv6白嫖校园网
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-05-22 13:01:27 / 修改时间：00:00:00" itemprop="dateCreated datePublished" datetime="2024-05-22T13:01:27+08:00">2024-05-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%A0%A1%E5%9B%AD%E7%BD%91/" itemprop="url" rel="index"><span itemprop="name">校园网</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>UDP 53 是 DNS 协议所用端口，由于门户（Portal）认证为了实现 HTTP 劫持跳转到登录页面，必须使得浏览器能够正常地进行 DNS 解析，因此在不认证、不付费的情况下也会放行 UDP 53 端口的流量</p>
+<span id="more"></span>
+
+<h2 id="实践路线"><a href="#实践路线" class="headerlink" title="实践路线"></a>实践路线</h2><p>本来是打算用学校内的服务器实现免流上网的，但是发现学校里任何一台机器都需要校园网认证，不如直接本机上网了（其实是懒没有去配网络）。听说机房的网络速度会快一点，宿舍只有上下100Mbps，机房有500Mbps。且校内存在IDS，有可能被识别为黑客流量被拦截，遂放弃。</p>
+<p>我使用的是Wireguard通过链接校外服务器实现偷跑流量，在实践的时候也遇到了一些问题，最开始的时候用阿里云（IPv4）的服务器测试了一下，发现在连接校园网的情况下可以正常连接到Wireguard，但是登出校园网之后就没有办法正常链接了，猜测原因可能是学校封死了IPv4出网，而DNS服务器设置在校内不需要出网。</p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522132426.png"></p>
+<p>到这里已经有点小绝望，不准备做了，但是在询问了学长以后发现了一些转机</p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522132709.png"></p>
+<p>于是乎我打算用家里的机器尝试一下，但是在给Debian虚拟机装上Wireguard出现了很尴尬的事情，IPv6联不通了，这明显与我们目的相背</p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522132854.png"></p>
+<p>后面又重装了一次系统，通过<a target="_blank" rel="noopener" href="https://github.com/wg-easy/wg-easy">wg-easy</a> 使用docker规避了IPv6消失的问题</p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522133725.png"></p>
+<p>由于IPv6可能变化，给这台虚拟机套上了<a target="_blank" rel="noopener" href="https://github.com/NewFuture/DDNS">DDNS</a></p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/20240522133923.png"></p>
+<h2 id="最终效果图"><a href="#最终效果图" class="headerlink" title="最终效果图"></a>最终效果图</h2><p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/d98dc936c39dbd73c796aa341ffdde8.png"></p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/7114c90aa8ef095f9e9ec8c32f8c1e1.png"></p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/9abdf27b5629378d5fae11f4f3672aa.png"></p>
+<p>注：由于学校在大连，和家里实在是有比较远的物理距离，实测CS2广州服务器稳定63ms无丢包，无畏契约广州MIX服务器60ms无丢包，甚至比校园网表现还要更胜一筹，后续发现需要更改Wireguard中dns可以获得更好的网页访问速度，如114.114.114.114</p>
+<h2 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h2><p>1.目前家到学校物理延迟过高，对于游戏玩家可能有较大影响</p>
+<p>2.家里带宽上行只有60Mbps，所以做不到有比较好的下载速度</p>
+<p>3.学校WiFi不发放ipv6地址，所以只有有线连接设备可以实现以上操作</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/694268514">内网穿透 篇六：通过 WireGuard 与 IPv6 异地组网 实现远程访问局域网 - 知乎 (zhihu.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://kenvix.com/post/use-school-network-without-paying-guide/#%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF1%EF%BC%9AWireGuard">校园网白嫖思路分享：局域网中转-不花钱、不认证、高速上网 | Kenvix’s Blog</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.muwind.top/post/105.html">OpenWrt旁路由配置wireguard+校园网白嫖教程 - 运维 - 沐风的博客 (muwind.top)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44122062/article/details/109011991">利用UDP端口转发绕过校园网认证-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/NewFuture/DDNS">NewFuture&#x2F;DDNS: :triangular_flag_on_post: 自动更新域名解析到本机IP(支持dnspod,阿里DNS,CloudFlare,华为云,DNSCOM…) (github.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/wg-easy/wg-easy">wg-easy&#x2F;wg-easy: The easiest way to run WireGuard VPN + Web-based Admin UI. (github.com)</a></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>用了家里的感觉物理延迟还是太高了，买了一台湖北的ipv6的机器，共享200M，500G一个月，16&#x2F;月，但是好像udp53端口没开，在等工单回复。67、68、69端口也做过测试，但实际被校园网屏蔽，遂放弃。看阿里云的说法是udp53端口默认关闭，但是先前我也测试过阿里云53udp是放行有点奇怪，等后续</p>
+<p><img src="https://raw.gitmirror.com/lfmjun/ilovekg/main/6be791bb9a7960f3285cc31ecfc8d54.png"></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>原创技术分享，您的支持将鼓励我继续创作</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Farah 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Farah 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Farah
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://blog.fala666.cn/2024/05/22/%E9%80%9A%E8%BF%87UDP53%E7%AB%AF%E5%8F%A3%E5%92%8CIPv6%E7%99%BD%E5%AB%96%E6%A0%A1%E5%9B%AD%E7%BD%91/" title="通过UDP53端口和IPv6白嫖校园网">https://blog.fala666.cn/2024/05/22/通过UDP53端口和IPv6白嫖校园网/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A0%A1%E5%9B%AD%E7%BD%91/" rel="tag"># 校园网</a>
+              <a href="/tags/%E7%99%BD%E5%AB%96/" rel="tag"># 白嫖</a>
+              <a href="/tags/%E7%BB%95%E8%BF%87/" rel="tag"># 绕过</a>
+              <a href="/tags/UDP/" rel="tag"># UDP</a>
+              <a href="/tags/DNS/" rel="tag"># DNS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/04/12/%E6%8A%96%E9%9F%B3%E7%9B%B4%E6%92%AD%E4%BC%B4%E4%BE%A3%E4%B8%80%E9%94%AE%E8%8E%B7%E5%8F%96%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8E%E6%8E%A8%E6%B5%81%E7%A0%81/" rel="prev" title="抖音直播伴侣一键获取服务器与推流码">
+      <i class="fa fa-chevron-left"></i> 抖音直播伴侣一键获取服务器与推流码
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E8%B7%B5%E8%B7%AF%E7%BA%BF"><span class="nav-number">2.</span> <span class="nav-text">实践路线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E6%95%88%E6%9E%9C%E5%9B%BE"><span class="nav-number">3.</span> <span class="nav-text">最终效果图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E8%B6%B3"><span class="nav-number">4.</span> <span class="nav-text">不足</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">6.</span> <span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Farah"
+      src="/images/R-C.jpg">
+  <p class="site-author-name" itemprop="name">Farah</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/LFMJUN" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;LFMJUN" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2023-10 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Farah</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">3k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">6 分钟</span>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.8' zIndex='-1' count='199' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
