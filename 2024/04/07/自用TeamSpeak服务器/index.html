@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.fala666.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.21.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="为什么有这一台服务器网上的语音软件硬件占用实在是太高了，某ook甚至可以让我孱弱的电脑打游戏掉帧，看到cs职业都在用teamspeak做语音服务器，所幸自己搭建了一台">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自用TeamSpeak服务器">
+<meta property="og:url" content="https://blog.fala666.cn/2024/04/07/%E8%87%AA%E7%94%A8TeamSpeak%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html">
+<meta property="og:site_name" content="法拉的小破站">
+<meta property="og:description" content="为什么有这一台服务器网上的语音软件硬件占用实在是太高了，某ook甚至可以让我孱弱的电脑打游戏掉帧，看到cs职业都在用teamspeak做语音服务器，所幸自己搭建了一台">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gh.fala666.cn/https://raw.githubusercontent.com/LFMJUN/ilovekg/main/5ef928e98b56af284849b64cb7a8fb7.png">
+<meta property="og:image" content="https://gh.fala666.cn/https://raw.githubusercontent.com/LFMJUN/ilovekg/main/%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20240407125720.png">
+<meta property="og:image" content="https://gh.fala666.cn/https://raw.githubusercontent.com/LFMJUN/ilovekg/main/03b0a94b02124497412e3a0eec69c8f.png">
+<meta property="article:published_time" content="2024-04-07T04:52:40.000Z">
+<meta property="article:modified_time" content="2024-10-24T14:19:03.181Z">
+<meta property="article:author" content="Farah">
+<meta property="article:tag" content="TeamSpeak">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gh.fala666.cn/https://raw.githubusercontent.com/LFMJUN/ilovekg/main/5ef928e98b56af284849b64cb7a8fb7.png">
+
+
+<link rel="canonical" href="https://blog.fala666.cn/2024/04/07/%E8%87%AA%E7%94%A8TeamSpeak%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://blog.fala666.cn/2024/04/07/%E8%87%AA%E7%94%A8TeamSpeak%E6%9C%8D%E5%8A%A1%E5%99%A8/","path":"2024/04/07/自用TeamSpeak服务器/","title":"自用TeamSpeak服务器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>自用TeamSpeak服务器 | 法拉的小破站</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">法拉的小破站</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">世界既不白也不黑，而是一道精致的灰</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E8%BF%99%E4%B8%80%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">为什么有这一台服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%99%E4%B8%AA%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">这个服务器有什么用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E9%9F%B3%E4%B9%90%E6%9C%BA%E5%99%A8%E4%BA%BA"><span class="nav-number">3.</span> <span class="nav-text">关于音乐机器人</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9A%82%E6%9C%AA%E5%AE%9E%E7%8E%B0%E5%8A%9F%E8%83%BD"><span class="nav-number">3.1.</span> <span class="nav-text">暂未实现功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%9C%B0%E5%9D%80"><span class="nav-number">4.</span> <span class="nav-text">服务器地址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%9F%A5%E9%81%93%E8%87%AA%E5%B7%B1%E7%9A%84%E7%94%B5%E8%84%91%E6%9C%89%E6%B2%A1%E6%9C%89IPv6%E5%91%A2"><span class="nav-number">4.1.</span> <span class="nav-text">如何知道自己的电脑有没有IPv6呢</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A6%82%E8%A7%88"><span class="nav-number">5.</span> <span class="nav-text">服务器概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TeamSpeak%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8B%E8%BD%BD"><span class="nav-number">6.</span> <span class="nav-text">TeamSpeak客户端下载</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Farah</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://blog.fala666.cn/2024/04/07/%E8%87%AA%E7%94%A8TeamSpeak%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Farah">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="法拉的小破站">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="自用TeamSpeak服务器 | 法拉的小破站">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自用TeamSpeak服务器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-04-07 12:52:40" itemprop="dateCreated datePublished" datetime="2024-04-07T12:52:40+08:00">2024-04-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-10-24 22:19:03" itemprop="dateModified" datetime="2024-10-24T22:19:03+08:00">2024-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/TeamSpeak/" itemprop="url" rel="index"><span itemprop="name">TeamSpeak</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="为什么有这一台服务器"><a href="#为什么有这一台服务器" class="headerlink" title="为什么有这一台服务器"></a>为什么有这一台服务器</h2><p>网上的语音软件硬件占用实在是太高了，某ook甚至可以让我孱弱的电脑打游戏掉帧，看到cs职业都在用teamspeak做语音服务器，所幸自己搭建了一台</p>
+<span id="more"></span>
+
+<h2 id="这个服务器有什么用"><a href="#这个服务器有什么用" class="headerlink" title="这个服务器有什么用"></a>这个服务器有什么用</h2><p>可以用来和朋友开黑，享受低占用软件语音聊天带来的快感</p>
+<h2 id="关于音乐机器人"><a href="#关于音乐机器人" class="headerlink" title="关于音乐机器人"></a>关于音乐机器人</h2><p>用户可以将机器人拖入自己的频道中，通过指令（频道描述中有）进行点歌</p>
+<p>网易云插件用的是<a target="_blank" rel="noopener" href="https://github.com/ZHANGTIANYAO1/TS3AudioBot-NetEaseCloudmusic-plugin">TS3AudioBot-NetEaseCloudmusic-plugin</a></p>
+<p><img src="https://gh.fala666.cn/https://raw.githubusercontent.com/LFMJUN/ilovekg/main/5ef928e98b56af284849b64cb7a8fb7.png"></p>
+<h3 id="暂未实现功能"><a href="#暂未实现功能" class="headerlink" title="暂未实现功能"></a>暂未实现功能</h3><p>·解锁版权歌曲（如周杰伦）</p>
+<h2 id="服务器地址"><a href="#服务器地址" class="headerlink" title="服务器地址"></a>服务器地址</h2><p><del>IPv4: v4.ts.yanser.net</del></p>
+<p><del>IPv6: v6.ts.yanser.net</del></p>
+<p>现在租了服务器可以直连 ts.yanser.net</p>
+<h3 id="如何知道自己的电脑有没有IPv6呢"><a href="#如何知道自己的电脑有没有IPv6呢" class="headerlink" title="如何知道自己的电脑有没有IPv6呢"></a><del>如何知道自己的电脑有没有IPv6呢</del></h3><p>在电脑浏览器输入 <a target="_blank" rel="noopener" href="https://ipw.cn/">ipw.cn</a></p>
+<p><img src="https://gh.fala666.cn/https://raw.githubusercontent.com/LFMJUN/ilovekg/main/%E5%BE%AE%E4%BF%A1%E6%88%AA%E5%9B%BE_20240407125720.png"></p>
+<p>如果返回结果为如图，则可以使用ipv6链接</p>
+<p>使用ipv6链接服务器可以享受更快速，丢包率更低的语音服务，并且可以查看频道图片图标等等</p>
+<h2 id="服务器概览"><a href="#服务器概览" class="headerlink" title="服务器概览"></a>服务器概览</h2><p>2024&#x2F;04&#x2F;07更新</p>
+<p><img src="https://gh.fala666.cn/https://raw.githubusercontent.com/LFMJUN/ilovekg/main/03b0a94b02124497412e3a0eec69c8f.png"></p>
+<h2 id="TeamSpeak客户端下载"><a href="#TeamSpeak客户端下载" class="headerlink" title="TeamSpeak客户端下载"></a>TeamSpeak客户端下载</h2><p><a target="_blank" rel="noopener" href="https://teamspeak.app/docs/basic/download/">客户端下载 – Vigorous Pro (teamspeak.app)</a></p>
+<p>请不要使用teamspeak中文站下载，中文站对客户端进行了修改，添加自己的中文语言包，去除更新模块等等。而且会在安装后屏蔽官方网站导致无法登录 myTeamSpeak 账户，进而导致无法使用 TeamSpeak 5 客户端。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TeamSpeak/" rel="tag"># TeamSpeak</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/10/31/%E9%80%9A%E8%BF%87Burpsuite%E6%8A%93%E5%8C%85%E5%AE%89%E5%8D%937%E5%8F%8A%E4%BB%A5%E4%B8%8A/" rel="prev" title="通过Burpsuite抓包安卓7及以上">
+                  <i class="fa fa-angle-left"></i> 通过Burpsuite抓包安卓7及以上
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/04/12/%E6%8A%96%E9%9F%B3%E7%9B%B4%E6%92%AD%E4%BC%B4%E4%BE%A3%E4%B8%80%E9%94%AE%E8%8E%B7%E5%8F%96%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8E%E6%8E%A8%E6%B5%81%E7%A0%81/" rel="next" title="抖音直播伴侣一键获取服务器与推流码">
+                  抖音直播伴侣一键获取服务器与推流码 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Farah</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
